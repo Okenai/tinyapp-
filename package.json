@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/Okenai/tinyapp-/issues"
   },
-  "homepage": "https://github.com/Okenai/tinyapp-#readme"
+  "homepage": "https://github.com/Okenai/tinyapp-#readme",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
 }
