@@ -27,8 +27,13 @@ function generateRandomString() {
   return randomString
 }
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
+//this feature was created as a practice, the header was changed to to make a TinyApp logo return to home page
+app.get("/home", (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  res.render("home", templateVars);
 });
 
 app.get("/urls", (req, res) => {
@@ -61,11 +66,9 @@ app.get("/urls/:shortURL", (req, res) => {
     username: req.cookies["username"]
   };
   res.render("urls_show", templateVars);
-
 });
 
 app.get("/u/:shortURL", (req, res) => {
-
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 
@@ -91,13 +94,21 @@ app.post('/login', (req, res) => {
     username: req.cookies["username"],
   };
   res.render("urls_index", templateVars);
-  
+
 });
 
 app.post('/logout', (req, res) => {
   res.clearCookie('username')
   res.redirect('/urls')
 });
+
+app.get('/register', (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    username: req.cookies["username"]
+  };
+  res.render('register', templateVars)
+})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
