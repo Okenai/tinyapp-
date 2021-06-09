@@ -55,12 +55,19 @@ app.get("/u/:shortURL", (req, res) => {
   
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
+
+});
+
+app.post("/urls/:shortURL", (req, res) => {
+  const longUrlChanged = req.body.longURL;
+  const shortURL = req.params.shortURL;
+  urlDatabase[shortURL] = longUrlChanged;
+res.redirect("/urls")
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
 const idToBeDeleted = req.params.shortURL;
 delete urlDatabase[idToBeDeleted];
-
 res.redirect('/urls')
 });
 
