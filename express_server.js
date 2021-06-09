@@ -15,13 +15,13 @@ const urlDatabase = {
 
 const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -127,33 +127,42 @@ app.get('/register', (req, res) => {
   res.render('register', templateVars)
 })
 
-app.post('/register', (req, res) => {
-  let newUserID = generateRandomString();
-  users[newUserID] = {
-    id: newUserID,
-    email: req.body.email, 
-    password: req.body.password
-  };
+const getUserByEmail = (email) => {
+  for (let id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user
+    }
+  }
+  return null;
+}
 
-  if (!req.body.email || !req.body.password) {
+app.post('/register', (req, res) => {
+  let email = req.body.email
+  let password = req.body.password
+
+  if (!email || !password) {
     return res.status(400).send("Please enter your email and password")
   }
-  
-  for (let user in users) {
-    if (users[user]['email'] === req.body.email) {
-      return res.status(400).send("The user is already registered")
-    }
-    
+
+  if (getUserByEmail(email)) {
+    return res.status(400).send("The user is already registered")
   }
+
  
 
-  res.cookie('user_id', req.body.email);
-  
+  let id = generateRandomString();
+  users[id] = {id, email, password };
+  console.log(users);
+
+  res.cookie('id', email);
+
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id'],
+    user: req.cookies['id'],
   };
-  res.redirect("/urls");
+
+  res.redirect("/login");
 })
 
 app.get('/login', (req, res) => {
@@ -162,6 +171,11 @@ app.get('/login', (req, res) => {
     user: req.cookies['user_id'],
   };
   res.render('login', templateVars)
+})
+
+app.post('/login', (req, res) => {
+
+  res.redirect("/urls");
 })
 
 app.post('/logout', (req, res) => {
