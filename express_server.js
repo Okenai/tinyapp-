@@ -143,7 +143,7 @@ app.post('/register', (req, res) => {
     if (users[user]['email'] === req.body.email) {
       return res.status(400).send("The user is already registered")
     }
-    // console.log(user)
+    
   }
  
 
@@ -154,6 +154,10 @@ app.post('/register', (req, res) => {
     user: req.cookies['user_id'],
   };
   res.redirect("/urls");
+})
+
+app.get('/login', (req, res) => {
+  res.render('login')
 })
 
 app.post('/logout', (req, res) => {
