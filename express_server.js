@@ -157,7 +157,11 @@ app.post('/register', (req, res) => {
 })
 
 app.get('/login', (req, res) => {
-  res.render('login')
+  const templateVars = {
+    urls: urlDatabase,
+    user: req.cookies['user_id'],
+  };
+  res.render('login', templateVars)
 })
 
 app.post('/logout', (req, res) => {
