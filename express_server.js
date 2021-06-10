@@ -79,7 +79,6 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   let tempShortUrl = generateRandomString();
   let longUrl = req.body.longURL;
   urlDatabase[tempShortUrl] = longUrl;
@@ -148,8 +147,7 @@ app.post('/register', (req, res) => {
 
   let id = generateRandomString();
   users[id] = { id, email, password };
-  console.log(users);
-
+ 
   res.cookie('id', id);
 
   res.redirect("/urls");
