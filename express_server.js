@@ -168,13 +168,12 @@ app.post('/login', (req, res) => {
   let user = getUserByEmail(email);
 
   if(!user) {
-   res.status(403).send("No user found.")
+   return res.status(403).send("No user found.")
   }
 
   if(password !== user.password) {
-    res.status(403).send("Wrong password")
+    return res.status(403).send("Wrong password")
   } 
-
  
   res.cookie('id', user.id);
 
