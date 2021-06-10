@@ -15,12 +15,12 @@ const users = {
   "userRandomID": {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur"
+    password: "$2a$10$VMlGy4Eh7cZF7vxS725x3u7Te4brjvrDCcNcP7r3G2YLUnD8rN8Se"
   },
   "user2RandomID": {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk"
+    password: "$2a$10$ZGpGqo46bP8tGyp8ffhVOeXJfjxWNCMOqZZlAhzdNsvtauv91Bxk2"
   }
 };
 
@@ -169,13 +169,13 @@ app.post('/register', (req, res) => {
     bcrypt.hash(password, salt, (err, hash) => {
       users[id] = { id, email, 
         password: hash };
-    })
-  })
-  
-  res.cookie('id', id);
 
-  res.redirect("/urls");
-})
+        res.cookie('id', id);
+      
+        res.redirect("/urls");
+    });
+  });
+});
 
 app.get('/login', (req, res) => {
   const templateVars = {
@@ -194,14 +194,15 @@ app.post('/login', (req, res) => {
   if (!user) {
     return res.status(403).send("No user found.")
   }
+  
+  bcrypt.compare(password, user.password, (err, result) => {
+    if (!result) {
+      return res.status(403).send("Wrong password.")
+    }
 
-  if (password !== user.password) {
-    return res.status(403).send("Wrong password")
-  }
-
-  res.cookie('id', user.id);
-
-  res.redirect("/urls");
+    res.cookie('id', user.id);
+    res.redirect("/urls");
+  }) 
 })
 
 app.post('/logout', (req, res) => {
