@@ -15,13 +15,13 @@ const urlDatabase = {
 
 const users = {
   "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
+    id: "userRandomID",
+    email: "user@example.com",
     password: "purple-monkey-dinosaur"
   },
- "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
     password: "dishwasher-funk"
   }
 };
@@ -58,22 +58,19 @@ app.get("/", (req, res) => {
   res.render("home", templateVars);
 });
 
-const urlsForUser = function(id) {
+const urlsForUser = function (id) {
   let URLS = {};
   for (let shortUrl in urlDatabase) {
     if (id === urlDatabase[shortUrl].userId) {
-    URLS[shortUrl] = urlDatabase[shortUrl].longUrl;
+      URLS[shortUrl] = urlDatabase[shortUrl].longUrl;
+    }
   }
-  } 
   return URLS;
 };
 
 //the page that has a table with our urlDatabase table and possibility to edit or delete the links
 app.get("/urls", (req, res) => {
   const userId = req.cookies['id']
-  console.log('function: ', urlsForUser(userId));
-  console.log('userId: ', userId);
-  console.log('urlDatabase', urlDatabase);
   const templateVars = {
     urls: urlsForUser(userId),
     user: users[userId]
@@ -96,7 +93,6 @@ app.post("/urls", (req, res) => {
   let tempShortUrl = generateRandomString();
   let longUrl = req.body.longURL;
   urlDatabase[tempShortUrl] = { longUrl, userId };
-  console.log(urlDatabase)
   res.redirect(`/urls/${tempShortUrl}`);
 });
 
@@ -126,8 +122,15 @@ app.post("/urls/:shortURL", (req, res) => {
 });
 
 app.post('/urls/:shortURL/delete', (req, res) => {
+  const userId = req.cookies['id']
+  let urls = urlsForUser(userId);
   const idToBeDeleted = req.params.shortURL;
-  delete urlDatabase[idToBeDeleted];
+
+  for (let url in urls) {
+    if (url === idToBeDeleted) {
+    delete urlDatabase[idToBeDeleted]
+  }}
+
   res.redirect('/urls')
 });
 
@@ -164,7 +167,7 @@ app.post('/register', (req, res) => {
 
   let id = generateRandomString();
   users[id] = { id, email, password };
- 
+
   res.cookie('id', id);
 
   res.redirect("/urls");
@@ -184,14 +187,14 @@ app.post('/login', (req, res) => {
 
   let user = getUserByEmail(email);
 
-  if(!user) {
-   return res.status(403).send("No user found.")
+  if (!user) {
+    return res.status(403).send("No user found.")
   }
 
-  if(password !== user.password) {
+  if (password !== user.password) {
     return res.status(403).send("Wrong password")
-  } 
- 
+  }
+
   res.cookie('id', user.id);
 
   res.redirect("/urls");

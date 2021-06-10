@@ -27,13 +27,15 @@
         <% for(let url in urls) { %>
           <tr>
             <td><%= url %></td>
-            <td><%= urls[url].longUrl %></td>
+            <td><%= urls[url] %></td>
             <td><form method="GET" action="/urls/<%= url %>"><button type="submit" class="btn btn-primary">Edit</button></form></td>
             <td><form method="POST" action="/urls/<%= url %>/delete"><button type="submit" class="btn btn-danger">Delete</button></form></td>
           </tr>
         <% } %>
       </tbody>
     </table>
+    <% } else { %>
+      <h5>You are not logged in to view URLs list. Please <a href="/login">login</a> or <a href='/register'>register</a>!</h5>
     <% } %>
   </main>
   <!-- Bootstrap JS -->
