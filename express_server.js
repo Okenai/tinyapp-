@@ -42,16 +42,18 @@ function generateRandomString() {
 
 //this feature was created as a practice, the header was changed to to make a TinyApp logo return to home page
 app.get("/home", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['id']
+    user: users[userId]
   };
   res.render("home", templateVars);
 });
 app.get("/", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['id']
+    user: users[userId]
   };
   res.render("home", templateVars);
 });
@@ -68,8 +70,10 @@ app.get("/urls", (req, res) => {
 
 
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
-    user: req.cookies['id']
+    urls: urlDatabase,
+    user: users[userId]
   };
   res.render("urls_new", templateVars);
 });
@@ -83,10 +87,11 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    user: req.cookies['id']
+    user: users[userId]
   };
   res.render("urls_show", templateVars);
 });
@@ -110,20 +115,11 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls')
 });
 
-// app.post('/login', (req, res) => {
-//   res.cookie('username', req.body.username);
-//   const templateVars = {
-//     urls: urlDatabase,
-//     username: req.cookies["username"],
-//   };
-//   res.render("urls_index", templateVars);
-
-// });
-
 app.get('/register', (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['id']
+    user: users[userId]
   };
   res.render('register', templateVars)
 })
