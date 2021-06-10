@@ -13,6 +13,19 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  "userRandomID": {
+    id: "userRandomID",
+    email: "user@example.com",
+    password: "purple-monkey-dinosaur"
+  },
+  "user2RandomID": {
+    id: "user2RandomID",
+    email: "user2@example.com",
+    password: "dishwasher-funk"
+  }
+};
+
 function generateRandomString() {
   let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let randomNumbers = [];
@@ -27,27 +40,45 @@ function generateRandomString() {
   return randomString
 }
 
-app.get("/", (req, res) => {
-  res.send("Hello!");
-});
-
-app.get("/urls", (req, res) => {
+//this feature was created as a practice, the header was changed to to make a TinyApp logo return to home page
+app.get("/home", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"]
+    user: users[userId]
+  };
+  res.render("home", templateVars);
+});
+app.get("/", (req, res) => {
+  const userId = req.cookies['id']
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[userId]
+  };
+  res.render("home", templateVars);
+});
+
+//the page that has a table with our urlDatabase table and possibility to edit or delete the links
+app.get("/urls", (req, res) => {
+  const userId = req.cookies['id']
+  const templateVars = {
+    urls: urlDatabase,
+    user: users[userId]
   };
   res.render("urls_index", templateVars);
 });
 
+
 app.get("/urls/new", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
-    username: req.cookies["username"]
+    urls: urlDatabase,
+    user: users[userId]
   };
   res.render("urls_new", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
   let tempShortUrl = generateRandomString();
   let longUrl = req.body.longURL;
   urlDatabase[tempShortUrl] = longUrl;
@@ -55,17 +86,16 @@ app.post("/urls", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    username: req.cookies["username"]
+    user: users[userId]
   };
   res.render("urls_show", templateVars);
-
 });
 
 app.get("/u/:shortURL", (req, res) => {
-
   const longURL = urlDatabase[req.params.shortURL];
   res.redirect(longURL);
 
@@ -84,18 +114,75 @@ app.post('/urls/:shortURL/delete', (req, res) => {
   res.redirect('/urls')
 });
 
-app.post('/login', (req, res) => {
-  res.cookie('username', req.body.username);
+app.get('/register', (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    username: req.cookies["username"],
+    user: users[userId]
   };
-  res.render("urls_index", templateVars);
-  
-});
+  res.render('register', templateVars)
+})
+
+const getUserByEmail = (email) => {
+  for (let id in users) {
+    const user = users[id];
+    if (user.email === email) {
+      return user
+    }
+  }
+  return null;
+}
+
+app.post('/register', (req, res) => {
+  let email = req.body.email
+  let password = req.body.password
+
+  if (!email || !password) {
+    return res.status(400).send("Please enter your email and password")
+  }
+
+  if (getUserByEmail(email)) {
+    return res.status(400).send("The user is already registered")
+  }
+
+  let id = generateRandomString();
+  users[id] = { id, email, password };
+ 
+  res.cookie('id', id);
+
+  res.redirect("/urls");
+})
+
+app.get('/login', (req, res) => {
+  const templateVars = {
+    urls: urlDatabase,
+    user: req.cookies['id'],
+  };
+  res.render('login', templateVars)
+})
+
+app.post('/login', (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+
+  let user = getUserByEmail(email);
+
+  if(!user) {
+   res.status(403).send("No user found.")
+  }
+
+  if(password !== user.password) {
+    res.status(403).send("Wrong password")
+  } 
+
+ 
+  res.cookie('id', user.id);
+
+  res.redirect("/urls");
+})
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('username')
+  res.clearCookie('id')
   res.redirect('/urls')
 });
 
