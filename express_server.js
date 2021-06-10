@@ -3,15 +3,13 @@ const app = express();
 const PORT = 8080;
 const bodyParser = require("body-parser");
 const cookieParser = require('cookie-parser')
+const bcrypt = require('bcryptjs');
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 
-const urlDatabase = {
-  b6UTxQ: { longURL: "https://www.tsn.ca", userID: "aJ48lW" },
-  i3BoGr: { longURL: "https://www.google.ca", userID: "aJ48lW" }
-};
+const urlDatabase = {};
 
 const users = {
   "userRandomID": {
@@ -166,8 +164,14 @@ app.post('/register', (req, res) => {
   }
 
   let id = generateRandomString();
-  users[id] = { id, email, password };
 
+  bcrypt.genSalt(10, (err, salt) => {
+    bcrypt.hash(password, salt, (err, hash) => {
+      users[id] = { id, email, 
+        password: hash };
+    })
+  })
+  
   res.cookie('id', id);
 
   res.redirect("/urls");
