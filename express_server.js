@@ -44,23 +44,24 @@ function generateRandomString() {
 app.get("/home", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id']
+    user: req.cookies['id']
   };
   res.render("home", templateVars);
 });
 app.get("/", (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id']
+    user: req.cookies['id']
   };
   res.render("home", templateVars);
 });
 
 //the page that has a table with our urlDatabase table and possibility to edit or delete the links
 app.get("/urls", (req, res) => {
+  const userId = req.cookies['id']
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id']
+    user: users[userId]
   };
   res.render("urls_index", templateVars);
 });
@@ -68,7 +69,7 @@ app.get("/urls", (req, res) => {
 
 app.get("/urls/new", (req, res) => {
   const templateVars = {
-    user: req.cookies['user_id']
+    user: req.cookies['id']
   };
   res.render("urls_new", templateVars);
 });
@@ -85,7 +86,7 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL],
-    user: req.cookies['user_id']
+    user: req.cookies['id']
   };
   res.render("urls_show", templateVars);
 });
@@ -122,7 +123,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 app.get('/register', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id']
+    user: req.cookies['id']
   };
   res.render('register', templateVars)
 })
@@ -149,37 +150,45 @@ app.post('/register', (req, res) => {
     return res.status(400).send("The user is already registered")
   }
 
- 
-
   let id = generateRandomString();
-  users[id] = {id, email, password };
+  users[id] = { id, email, password };
   console.log(users);
 
-  res.cookie('id', email);
+  res.cookie('id', id);
 
-  const templateVars = {
-    urls: urlDatabase,
-    user: req.cookies['id'],
-  };
-
-  res.redirect("/login");
+  res.redirect("/urls");
 })
 
 app.get('/login', (req, res) => {
   const templateVars = {
     urls: urlDatabase,
-    user: req.cookies['user_id'],
+    user: req.cookies['id'],
   };
   res.render('login', templateVars)
 })
 
 app.post('/login', (req, res) => {
+  let email = req.body.email;
+  let password = req.body.password;
+
+  let user = getUserByEmail(email);
+
+  if(!user) {
+   res.status(403).send("No user found.")
+  }
+
+  if(password !== user.password) {
+    res.status(403).send("Wrong password")
+  } 
+
+ 
+  res.cookie('id', user.id);
 
   res.redirect("/urls");
 })
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id')
+  res.clearCookie('id')
   res.redirect('/urls')
 });
 
