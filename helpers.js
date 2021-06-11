@@ -1,27 +1,36 @@
+
 const getUserByEmail = (email, database) => {
   for (let id in database) {
     const user = database[id];
     if (user.email === email) {
-      return id
+      return id;
     }
   }
   return null;
 };
 
-module.exports = {getUserByEmail};
-
-
-const testUsers = {
-  "userRandomID": {
-    id: "userRandomID", 
-    email: "user@example.com", 
-    password: "purple-monkey-dinosaur"
-  },
-  "user2RandomID": {
-    id: "user2RandomID", 
-    email: "user2@example.com", 
-    password: "dishwasher-funk"
+const generateRandomString = function () {
+  let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+  let randomNumbers = [];
+  let randomString = '';
+  for (let i = 0; i <= 5; i++) {
+    let randomNumber = Math.floor(Math.random() * 61);
+    randomNumbers.push(randomNumber);
   }
-};
+  for (let number of randomNumbers) {
+    randomString += characters[number];
+  }
+  return randomString;
+}
 
-console.log(getUserByEmail("user@example.com", testUsers))
+const urlsForUser = function (id, urlDatabase) {
+  let URLS = {};
+  for (let shortUrl in urlDatabase) {
+    if (id === urlDatabase[shortUrl].userId) {
+      URLS[shortUrl] = urlDatabase[shortUrl].longURL;
+    }
+  }
+  return URLS;
+};
+module.exports = { getUserByEmail, generateRandomString, urlsForUser };
+
