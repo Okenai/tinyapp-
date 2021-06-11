@@ -33,7 +33,7 @@ app.get("/", (req, res) => {
   const userId = req.session.id;
 
   if (!userId) {
-    res.redirect('/login');
+    return res.redirect('/login');
   }
 
   const templateVars = {
@@ -106,7 +106,7 @@ app.post("/urls", (req, res) => {
   let tempShortUrl = generateRandomString();
   let longURL = req.body.longURL;
 
-  if (!longURL.includes('http')) { 
+  if (!longURL.includes('http')) {
     longURL = 'http://' + longURL;
   }
 
@@ -143,7 +143,7 @@ app.post('/urls/:shortURL/delete', (req, res) => {
 //   GET /login
 app.get('/login', (req, res) => {
   const userId = req.session.id;
-  
+
   const templateVars = {
     urls: urlDatabase,
     user: users[userId]
