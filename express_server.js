@@ -16,7 +16,7 @@ app.set("view engine", "ejs");
 const urlDatabase = {};
 const users = {};
 
-//this page was created as a practice, the header was changed to to make a TinyApp logo return to home page
+//   GET /home was created as a practice, the header was changed to to make a TinyApp logo return to home page
 app.get("/home", (req, res) => {
   const userId = req.session.id;
 
@@ -28,10 +28,11 @@ app.get("/home", (req, res) => {
   res.render("home", templateVars);
 });
 
-//   GET /
+//   GET / -> redirects users to /urls page
 app.get("/", (req, res) => {
   const userId = req.session.id;
 
+  // to redirect unloged users to login page:
   if (!userId) {
     return res.redirect('/login');
   }
@@ -44,7 +45,7 @@ app.get("/", (req, res) => {
   res.redirect('/urls');
 });
 
-//  GET /urls 
+//  GET /urls -> restriction unlogged users is implemented using if in line 14 of 'urls_index.ejs'
 app.get("/urls", (req, res) => {
   const userId = req.session.id;
 
@@ -68,11 +69,12 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new", templateVars);
 });
 
-//   GET /urls/:id
+//   GET /urls/:id -> restriction unlogged users is implemented using if in line 15 of 'urls_show.ejs'
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.id;
   const shortURL = req.params.shortURL;
 
+  //to restrict loged users only view their urls
   if (!urlsForUser(userId, urlDatabase).hasOwnProperty(shortURL)) {
     return res.status(401).send("Sorry you are not authorised");
   }
@@ -91,10 +93,6 @@ app.get("/u/:shortURL", (req, res) => {
   const userId = req.session.id;
   const shortURL = req.params.shortURL;
 
-  if (!urlsForUser(userId, urlDatabase).hasOwnProperty(shortURL)) {
-    return res.status(401).send("Sorry you are not authorised");
-  }
-
   const longURL = urlDatabase[shortURL].longURL;
 
   res.redirect(longURL);
@@ -105,7 +103,7 @@ app.post("/urls", (req, res) => {
   const userId = req.session.id;
   let tempShortUrl = generateRandomString();
   let longURL = req.body.longURL;
-
+// to ensure that all longURL in database contain http protocol in their url
   if (!longURL.includes('http')) {
     longURL = 'http://' + longURL;
   }
@@ -128,9 +126,12 @@ app.post("/urls/:shortURL", (req, res) => {
 //   POST /urls/:id/delete
 app.post('/urls/:shortURL/delete', (req, res) => {
   const userId = req.session.id;
+
+  //urlsForUser function creates an object containing only urls for the logged in user
   let urls = urlsForUser(userId, urlDatabase);
   const idToBeDeleted = req.params.shortURL;
 
+  //looping through only users urls to check if the requested url is there and is possible to delete 
   for (let url in urls) {
     if (url === idToBeDeleted) {
       delete urlDatabase[idToBeDeleted];
@@ -173,7 +174,7 @@ app.post('/login', (req, res) => {
   if (!user) {
     return res.status(403).send("No user found.");
   }
-
+  //to compare the hash created in POST /register with the one entered in login form (retrieved from req.body)
   bcrypt.compare(password, user.password, (err, result) => {
     if (!result) {
       return res.status(403).send("Wrong password.");
@@ -188,17 +189,20 @@ app.post('/login', (req, res) => {
 app.post('/register', (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
-
+  
+  //to check if email and password were entered (if req.body contains them)
   if (!email || !password) {
     return res.status(400).send("Please enter your email and password");
   }
-
+  
+  //to check if the users database already contains the email entered (retrieved from req.body)
   if (getUserByEmail(email, users)) {
     return res.status(400).send("The user is already registered");
   }
 
   let id = generateRandomString();
 
+  //if the user was not found in the user database, the new user will be added to it with hased password by bcrypt and cookie will be encrypted by req.session
   bcrypt.genSalt(10, (err, salt) => {
     bcrypt.hash(password, salt, (err, hash) => {
       users[id] = {
